@@ -122,14 +122,32 @@ module.exports = function (grunt) {
     }<% } %>
   });
 
-  grunt.registerTask('build', [
-    'clean',
-    'pages',
-    <% if (CSSPreprocessorTask) %>'<%= CSSPreprocessorTask %>',
-    'copy'
-  ]);
+  <% if (deployTask) { %>
+  grunt.registerTask('build', function (target) {
+    if (target === 'deploy') {
+      // Change this string to the base url which you are
+      // deploying to, for example if you are deploying this
+      // Cabin to yoursite.com/blog/, update the string to '/blog/'
+      grunt.config('pages.posts.options.data.baseUrl', '/');
+    }
 
-  <% if (deployTask) { %>grunt.registerTask('deploy', ['build', '<%= deployTask %>']);<% } %>
+    grunt.task.run([
+      'clean',
+      'pages',
+      'compass',
+      'copy'
+    ]);
+  });
+
+  grunt.registerTask('deploy', ['build:deploy', '<%= deployTask %>']);
+  <% } else { %>
+     grunt.registerTask('build', [
+      'clean',
+      'pages',
+      'compass',
+      'copy'
+    ]);
+  <% } %>
 
   grunt.registerTask('server', [
     'build',
