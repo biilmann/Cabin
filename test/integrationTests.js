@@ -91,7 +91,7 @@ describe('the cabin new command', function () {
 
   describe('when installing any theme', function () {
 
-    describe('when selecting the Jade or EJS template engine', function () {
+    describe('when selecting a template engine', function () {
 
       it('should only copy that template engine\'s theme files to the site folder', function (done) {
 
