@@ -1,12 +1,17 @@
 module.exports = function (grunt) {
 
+  // Change this string to the base url which you are
+  // deploying to, for example if you are deploying this
+  // Cabin to yoursite.com/blog/, update the string to '/blog/'
+  var baseUrl = '/';
+
   grunt.initConfig({
     pages: <%= gruntPagesConfig %>,<% if (CSSPreprocessorTask === 'compass') { %>
     compass: {
       dist: {
         options: {
           sassDir: 'src/styles',
-          cssDir: 'dist/styles'
+          cssDir: 'dist' + baseUrl + 'styles'
         }
       }
     },<% } else if (CSSPreprocessorTask === 'less') { %>
@@ -16,7 +21,7 @@ module.exports = function (grunt) {
           paths: ['src/styles']
         },
         files: {
-          'dist/styles/main.css': 'src/styles/main.less'
+          'dist' + baseUrl + 'styles/main.css': 'src/styles/main.less'
         }
       }
     },<% } %>
@@ -25,7 +30,7 @@ module.exports = function (grunt) {
         files: [{
           expand: true,
           cwd: 'src',
-          dest: 'dist',
+          dest: 'dist' + baseUrl,
           src: [
             'images/**',
             'scripts/**',
@@ -70,13 +75,9 @@ module.exports = function (grunt) {
           port: 5455,
           hostname: '0.0.0.0',
           base: 'dist',
-          livereload: true
+          livereload: true,
+          open: 'http://localhost:5455' + baseUrl
         }
-      }
-    },
-    open: {
-      dist: {
-        path: 'http://localhost:5455'
       }
     },
     clean: {
@@ -84,7 +85,7 @@ module.exports = function (grunt) {
     },<% if (deployTask === 'gh-pages') { %>
     'gh-pages': {
       options: {
-        base: 'dist'
+        base: 'dist' + baseUrl
       },
       src: ['**']
     }<% } else if (deployTask === 's3') { %>
@@ -100,7 +101,7 @@ module.exports = function (grunt) {
       dev: {
         upload: [{
           src: 'dist/**',
-          rel: 'dist',
+          rel: 'dist' + baseUrl,
           dest: '/'
         }]
       }
@@ -115,39 +116,19 @@ module.exports = function (grunt) {
           authKey: 'key'
         },
         src: 'dist',
-        dest: '/public_html',
+        dest: '/public_html' + baseUrl,
         simple: true,
         exclusions: ['**.DS_Store']
       }
     }<% } %>
   });
 
-  <% if (deployTask) { %>
-  grunt.registerTask('build', function (target) {
-    if (target === 'deploy') {
-      // Change this string to the base url which you are
-      // deploying to, for example if you are deploying this
-      // Cabin to yoursite.com/blog/, update the string to '/blog/'
-      grunt.config('pages.posts.options.data.baseUrl', '/');
-    }
-
-    grunt.task.run([
-      'clean',
-      'pages',
-      'compass',
-      'copy'
-    ]);
-  });
-
-  grunt.registerTask('deploy', ['build:deploy', '<%= deployTask %>']);
-  <% } else { %>
-     grunt.registerTask('build', [
-      'clean',
-      'pages',
-      'compass',
-      'copy'
-    ]);
-  <% } %>
+  grunt.registerTask('build', [
+    'clean',
+    'pages',
+    'compass',
+    'copy'
+  ]);
 
   grunt.registerTask('server', [
     'build',
